@@ -3,6 +3,7 @@
 #include <vector>
 #include <ctime>
 #include <conio.h>
+#include <fstream>
 
 //Описываем класс Задача
 class Task {
@@ -20,6 +21,7 @@ public:
     std::string getDescription() { return description; }
     int getPriority() { return priority; }
     int getId() { return id; }
+
     //Конструктор без парамертров
     Task() {
         id = -1;
@@ -107,6 +109,9 @@ void editTask(std::vector<Task>& vect);
 //Удаление задачи
 void dropTask(std::vector<Task>& vect);
 
+//Запись в файл
+void fileWrite(std::vector<Task>& vect);
+
 //Точка входа
 int main() {
     int choose = -1, count = 0;
@@ -129,6 +134,7 @@ int main() {
             dropTask(tasks);
             choose = -1;
         } else if (choose == 4) {
+            fileWrite(tasks);
             std::cout << "Программа завершила работу.";
             system("pause");
             break;
@@ -216,6 +222,23 @@ void dropTask(std::vector<Task>& vect) {
     system("pause");
 }
 
+//Запись в файл
+void fileWrite(std::vector<Task>& vect) {
+    std::ofstream ass;
+    ass.open("C:/Users/mikha/CLionProjects/toodoo/tasks.txt");
+    if (!ass.is_open()) {
+        std::cout << "File error" << std::endl;
+        system("pause");
+    }
+    std::string result;
+    for (int i = 0; i < vect.size(); i++) {
+        result += std::to_string(vect[i].getId()) + "\\o" + vect[i].getName() + "\\o" + vect[i].getDescription() + "\\o" + std::to_string(vect[i].getPriority()) + "\\n";
+    }
+    ass << result;
+    ass.close();
+}
+
 //Вниз 115
 //Вверх 119
 //Энтер 13
+//Esc 27
