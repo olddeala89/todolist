@@ -4,6 +4,7 @@
 #include <ctime>
 #include <conio.h>
 #include <fstream>
+#include "nlohmann/single_include/nlohmann/json.hpp"
 
 //Описываем класс Задача
 class Task {
@@ -112,12 +113,16 @@ void dropTask(std::vector<Task>& vect);
 //Запись в файл
 void fileWrite(std::vector<Task>& vect);
 
+//Чтение из файла
+void fileRead(std::vector<Task>& vect, int& count);
+
 //Точка входа
 int main() {
     int choose = -1, count = 0;
     system("chcp 65001");
     test();
     std::vector<Task> tasks;
+    fileRead(tasks ,count);
     while (true) {
         menu(choose);
         if (choose == 0) {
@@ -140,13 +145,10 @@ int main() {
             break;
         }
     }
-
     return 0;
-    /*int ch = _getch();
-    std::cout << ch << std::endl;*/
 }
 
-//Создание новой задачи расписываем функцию
+//Создание новой задачи
 void addTask(std::vector<Task>& vect, int& count) {
     system("cls");
     std::cout << "Давайте создадим новую задачу.\nВведите что нужно сделать:\n";
@@ -225,17 +227,44 @@ void dropTask(std::vector<Task>& vect) {
 //Запись в файл
 void fileWrite(std::vector<Task>& vect) {
     std::ofstream ass;
-    ass.open("C:/Users/mikha/CLionProjects/toodoo/tasks.txt");
+    ass.open("C:/Users/Nakon_yw29/CLionProjects/todolist/tasks.txt");
     if (!ass.is_open()) {
         std::cout << "File error" << std::endl;
         system("pause");
     }
-    std::string result;
     for (int i = 0; i < vect.size(); i++) {
-        result += std::to_string(vect[i].getId()) + "\\o" + vect[i].getName() + "\\o" + vect[i].getDescription() + "\\o" + std::to_string(vect[i].getPriority()) + "\\n";
+        nlohmann::json obj;
+        obj["id"] = vect.at(i).getId();
+        obj["name"] = vect.at(i).getName();
+        obj["desc"] = vect.at(i).getDescription();
+        obj["prio"] = vect.at(i).getPriority();
+        std::string jsonStr = obj.dump();
+        ass << jsonStr << "\n";
     }
-    ass << result;
     ass.close();
+}
+
+//Чтение из файла
+void fileRead(std::vector<Task>& vect, int& count) {
+    std::string name, desc, s_id, s_prio;
+    int max_id = 0;
+    std::ifstream ass("C:/Users/Nakon_yw29/CLionProjects/todolist/tasks.txt");
+    if (ass.peek() == std::ifstream::traits_type::eof()) {
+        std::cout << "File is empty" << std::endl;
+    } else {
+            std::string line;
+            while (!ass.eof() && std::getline(ass, line, '\n'))
+            {
+                nlohmann::json obj;
+                obj = nlohmann::json::parse(line);
+                vect.push_back(Task(obj["id"], obj["name"], obj["desc"], obj["prio"]));
+                if (obj["id"] > max_id) {
+                    max_id = obj["id"];
+                }
+            }
+    }
+    ass.close();
+    count = (max_id + 1);
 }
 
 //Вниз 115
